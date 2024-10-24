@@ -1,42 +1,37 @@
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
-const userController = require("./controllers/userController");
-const bookController = require("./controllers/bookController");
-const authenticateToken = require("./middleware/auth"); // Import the authentication middleware
+require("dotenv").config();
 
-dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const pool = require("./db");
+const userController = require("./controllers/userController");
+const bookController = require("./controllers/bookController");
+const authenticateToken = require("./middleware/auth");
+
 // Middleware
 app.use(cors());
-app.use(express.json()); // Enable JSON data processing
+app.use(express.json());
 
-// Base route
+// Routes
 app.get("/", (req, res) => {
   res.send("Welcome to TradeMyBook API");
 });
 
-// User registration route
+// Public routes
 app.post("/api/register", userController.register);
-
-// User login route
 app.post("/api/login", userController.login);
 
-// Add book route (protected)
+// Protected routes
 app.post("/api/books", authenticateToken, bookController.addBook);
-
-// Search books by location route (protected)
 app.get(
   "/api/books/location/:location_id",
   authenticateToken,
   bookController.getBooksByLocation
 );
 
-// Start the server
+// Start server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-const pool = require("./db");

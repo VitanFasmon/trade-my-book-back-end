@@ -1,15 +1,17 @@
 const jwt = require("jsonwebtoken");
 
-// Middleware to protect routes
-function authenticateToken(req, res, next) {
-  const token = req.headers["authorization"]?.split(" ")[1]; // Extract token from the Authorization header
-  if (!token) return res.sendStatus(401); // No token provided
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) return res.status(401).json({ message: "Unauthorized" });
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403); // Invalid token
-    req.user = user; // Save user info in request
-    next(); // Proceed to next middleware
+    if (err) return res.status(403).json({ message: "Forbidden" });
+
+    req.user = user;
+    next();
   });
-}
+};
 
 module.exports = authenticateToken;
