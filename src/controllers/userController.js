@@ -18,7 +18,7 @@ exports.register = async (req, res) => {
     res.status(201).json(newUser.rows[0]);
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: `Something went wrong: ${error.message}` });
   }
 };
 
@@ -50,6 +50,6 @@ exports.login = async (req, res) => {
     res.json({ token });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: `Something went wrong: ${error.message}` });
   }
 };
