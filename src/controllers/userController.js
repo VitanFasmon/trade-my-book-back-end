@@ -7,6 +7,16 @@ exports.register = async (req, res) => {
   const { name, email, phone_number, password, location_id } = req.body;
 
   try {
+    // Check if the email already exists
+    const existingUser = await pool.query(
+      `SELECT * FROM app_user WHERE email = $1`,
+      [email]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(409).json({ message: "Email already in use" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await pool.query(

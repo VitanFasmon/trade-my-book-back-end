@@ -2,15 +2,31 @@ const Book = require("../models/Book");
 
 const bookController = {
   addBook: async (req, res) => {
-    const { user_id, google_books_api_id, condition, picture, trade_status } =
-      req.body;
+    // Extract user ID from the JWT token
+    const userId = req.user.user_id; // Assuming req.user is populated by your authentication middleware
+
+    // Destructure the required fields from req.body
+    const {
+      title,
+      author,
+      description,
+      isbn,
+      google_books_id,
+      cover_url,
+      book_condition, // Ensure this is an integer between 1 and 10
+    } = req.body;
+
     try {
+      // Call the addBook method with the new parameters
       const book = await Book.addBook(
-        user_id,
-        google_books_api_id,
-        condition,
-        picture,
-        trade_status
+        title,
+        author,
+        description,
+        isbn,
+        google_books_id,
+        userId, // Use the extracted user ID
+        cover_url,
+        book_condition
       );
       res.json(book);
     } catch (error) {
