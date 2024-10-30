@@ -28,7 +28,7 @@ const bookController = {
         cover_url,
         book_condition
       );
-      res.json(book);
+      res.json({ data: book }); // Wrap in a data property
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Failed to add book" });
@@ -39,7 +39,18 @@ const bookController = {
     const { location_id } = req.params;
     try {
       const books = await Book.getBooksByLocation(location_id);
-      res.json(books);
+      res.json({ data: books }); // Wrap in a data property
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to fetch books" });
+    }
+  },
+
+  getBooksByUser: async (req, res) => {
+    const userId = req.user.user_id;
+    try {
+      const books = await Book.getBooksByUser(userId);
+      res.json({ data: books }); // Wrap in a data property
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Failed to fetch books" });

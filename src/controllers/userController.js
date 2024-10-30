@@ -1,13 +1,12 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const pool = require("../db");
+const User = require("../models/User");
 
-// Register user
 exports.register = async (req, res) => {
   const { name, email, phone_number, password, location_id } = req.body;
 
   try {
-    // Check if the email already exists
     const existingUser = await pool.query(
       `SELECT * FROM app_user WHERE email = $1`,
       [email]
@@ -21,7 +20,7 @@ exports.register = async (req, res) => {
 
     const newUser = await pool.query(
       `INSERT INTO app_user (name, email, phone_number, password, location_id) 
-             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [name, email, phone_number, hashedPassword, location_id]
     );
 
@@ -32,34 +31,64 @@ exports.register = async (req, res) => {
   }
 };
 
-// Login user
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await pool.query(`SELECT * FROM app_user WHERE email = $1`, [
+    const result = await pool.query(`SELECT * FROM app_user WHERE email = $1`, [
       email,
     ]);
 
-    if (user.rows.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    const validPassword = await bcrypt.compare(password, user.rows[0].password);
+    const user = result.rows[0];
+
+    const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
-      { user_id: user.rows[0].user_id, email: user.rows[0].email },
+      { user_id: user.user_id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    res.json({ token });
+    const { password: _, ...userData } = user;
+
+    res.json({ token, data: userData });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: `Something went wrong: ${error.message}` });
+  }
+};
+
+exports.getUserData = async (req, res) => {
+  const userId = req.user.user_id;
+  try {
+    const user = await User.findByUserId(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({ data: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch user" });
+  }
+};
+
+exports.getUserDataByEmail = async (req, res) => {
+  const { email } = req.params;
+  try {
+    const user = await User.findByUserEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({ data: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch user" });
   }
 };

@@ -8,6 +8,8 @@ const PORT = process.env.PORT || 3000;
 const pool = require("./db");
 const userController = require("./controllers/userController");
 const bookController = require("./controllers/bookController");
+const locationController = require("./controllers/locationController");
+
 const authenticateToken = require("./middleware/auth");
 
 // Middleware
@@ -23,13 +25,27 @@ app.get("/", (req, res) => {
 app.post("/api/register", userController.register);
 app.post("/api/login", userController.login);
 
-// Protected routes
+// Protected book routes
 app.post("/api/books", authenticateToken, bookController.addBook);
 app.get(
   "/api/books/location/:location_id",
   authenticateToken,
   bookController.getBooksByLocation
 );
+app.get("/api/books/user", authenticateToken, bookController.getBooksByUser);
+
+// Protected user routes
+app.get("/api/user", authenticateToken, userController.getUserData);
+app.get(
+  "/api/user/email/:email",
+  authenticateToken,
+  userController.getUserData
+);
+
+//Location routes
+app.post("/api/location", locationController.addLocation);
+app.get("/api/location/:id", locationController.findLocationById);
+app.get("/api/location", locationController.findLocationByAddress);
 
 // Start server
 app.listen(PORT, () => {

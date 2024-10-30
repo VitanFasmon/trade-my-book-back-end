@@ -17,6 +17,20 @@ class User {
     ]);
     return user.rows[0];
   }
+  static async findByUserId(userId) {
+    const result = await pool.query(
+      "SELECT name, email, phone_number,location_id FROM App_User WHERE user_id = $1",
+      [userId]
+    );
+    return result.rows[0];
+  }
+  static async findByUserEmail(email) {
+    const result = await pool.query(
+      "SELECT name, email, phone_number,location_id FROM App_User WHERE email = $1",
+      [email]
+    );
+    return result.rows[0];
+  }
 }
 
 module.exports = User;

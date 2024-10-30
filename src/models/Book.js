@@ -34,6 +34,14 @@ class Book {
     );
     return books.rows;
   }
+
+  static async getBooksByUser(added_by_user_id) {
+    const books = await pool.query(
+      "SELECT * FROM Book WHERE added_by_user_id = $1",
+      [added_by_user_id]
+    );
+    return books.rows;
+  }
 }
 
 module.exports = Book;
