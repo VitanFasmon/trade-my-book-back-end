@@ -2,10 +2,8 @@ const Book = require("../models/Book");
 
 const bookController = {
   addBook: async (req, res) => {
-    // Extract user ID from the JWT token
-    const userId = req.user.user_id; // Assuming req.user is populated by your authentication middleware
+    const userId = req.user.user_id;
 
-    // Destructure the required fields from req.body
     const {
       title,
       author,
@@ -13,22 +11,21 @@ const bookController = {
       isbn,
       google_books_id,
       cover_url,
-      book_condition, // Ensure this is an integer between 1 and 10
+      book_condition,
     } = req.body;
 
     try {
-      // Call the addBook method with the new parameters
       const book = await Book.addBook(
         title,
         author,
         description,
         isbn,
         google_books_id,
-        userId, // Use the extracted user ID
+        userId,
         cover_url,
         book_condition
       );
-      res.json({ data: book }); // Wrap in a data property
+      res.json({ data: book });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Failed to add book" });
@@ -39,7 +36,7 @@ const bookController = {
     const { location_id } = req.params;
     try {
       const books = await Book.getBooksByLocation(location_id);
-      res.json({ data: books }); // Wrap in a data property
+      res.json({ data: books });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Failed to fetch books" });
@@ -50,10 +47,34 @@ const bookController = {
     const userId = req.user.user_id;
     try {
       const books = await Book.getBooksByUser(userId);
-      res.json({ data: books }); // Wrap in a data property
+      res.json({ data: books });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Failed to fetch books" });
+    }
+  },
+  removeBookById: async (req, res) => {
+    const userId = req.user.user_id;
+    const { book_id } = req.params;
+
+    try {
+      const book = await Book.findBookById(book_id);
+
+      if (!book) {
+        return res.status(404).json({ error: "Book not found" });
+      }
+
+      if (book.added_by_user_id !== userId) {
+        return res
+          .status(403)
+          .json({ error: "You do not have permission to delete this book" });
+      }
+
+      const deletedBook = await Book.removeBookById(book_id);
+      res.json({ data: deletedBook });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to delete book" });
     }
   },
 };

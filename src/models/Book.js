@@ -27,6 +27,20 @@ class Book {
     return newBook.rows[0];
   }
 
+  static async removeBookById(book_id) {
+    const removedBook = await pool.query(
+      "DELETE FROM Book WHERE book_id = $1 RETURNING *",
+      [book_id]
+    );
+    return removedBook.rows[0];
+  }
+  static async findBookById(book_id) {
+    const book = await pool.query("SELECT * FROM Book WHERE book_id = $1", [
+      book_id,
+    ]);
+    return book.rows[0];
+  }
+
   static async getBooksByLocation(location_id) {
     const books = await pool.query(
       "SELECT * FROM Book WHERE added_by_user_id IN (SELECT user_id FROM App_User WHERE location_id = $1)",

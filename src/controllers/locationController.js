@@ -1,13 +1,15 @@
 const Location = require("../models/Location");
 
 exports.addLocation = async (req, res) => {
-  const { address, lat, lon } = req.body;
+  const { address, lat, lng } = req.body;
 
   try {
-    const location = await Location.addLocation(address, lat, lon);
+    const location = await Location.addLocation(address, lat, lng);
     res.status(201).json({
-      message: "Location processed successfully",
-      location_id: location.location_id,
+      data: {
+        message: "Location processed successfully",
+        location_id: location.location_id,
+      },
     });
   } catch (error) {
     console.error("Error adding location:", error);
