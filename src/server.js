@@ -33,7 +33,16 @@ app.get(
   bookController.getBooksByLocation
 );
 app.get("/api/books/user", authenticateToken, bookController.getBooksByUser);
-
+app.delete(
+  "/api/books/:book_id",
+  authenticateToken,
+  bookController.removeBookById
+);
+app.patch(
+  "/api/books/tradable/:book_id/:tradable",
+  authenticateToken,
+  bookController.toggleTradableBookById
+);
 // Protected user routes
 app.get("/api/user", authenticateToken, userController.getUserData);
 app.get(

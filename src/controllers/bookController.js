@@ -6,24 +6,34 @@ const bookController = {
 
     const {
       title,
+      subtitle,
       author,
+      language,
+      published_date,
+      categories,
       description,
       isbn,
       google_books_id,
       cover_url,
       book_condition,
+      tradable,
     } = req.body;
 
     try {
       const book = await Book.addBook(
+        userId,
         title,
+        subtitle,
         author,
+        language,
+        published_date,
+        categories,
         description,
         isbn,
         google_books_id,
-        userId,
         cover_url,
-        book_condition
+        book_condition,
+        tradable
       );
       res.json({ data: book });
     } catch (error) {
@@ -75,6 +85,33 @@ const bookController = {
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Failed to delete book" });
+    }
+  },
+  toggleTradableBookById: async (req, res) => {
+    const userId = req.user.user_id;
+    const { book_id, tradable } = req.params;
+
+    try {
+      const book = await Book.findBookById(book_id);
+
+      if (!book) {
+        return res.status(404).json({ error: "Book not found" });
+      }
+
+      if (book.added_by_user_id !== userId) {
+        return res
+          .status(403)
+          .json({ error: "You do not have permission to update this book" });
+      }
+
+      const updatedBook = await Book.toggleTradableBookById(book_id, tradable);
+      res.json({
+        data: updatedBook,
+        message: "Book tradability updated successfully.",
+      });
+    } catch (error) {
+      console.error("Error toggling book tradability:", error);
+      res.status(500).json({ error: "Failed to update book" });
     }
   },
 };

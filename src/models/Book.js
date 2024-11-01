@@ -2,26 +2,40 @@ const pool = require("../db");
 
 class Book {
   static async addBook(
+    added_by_user_id,
     title,
+    subtitle,
     author,
+    language,
+    published_date,
+    categories,
     description,
     isbn,
     google_books_id,
-    added_by_user_id,
     cover_url,
-    book_condition
+    book_condition,
+    tradable
   ) {
+    if (/^\d{4}$/.test(published_date)) {
+      published_date = `${published_date}-01-01`;
+    }
+
     const newBook = await pool.query(
-      "INSERT INTO Book (title, author, description, isbn, google_books_id, added_by_user_id, cover_url, book_condition) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+      "INSERT INTO Book (added_by_user_id, title, subtitle, author, language, published_date, categories, description, isbn, google_books_id, cover_url, book_condition,tradable) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
       [
+        added_by_user_id,
         title,
+        subtitle,
         author,
+        language,
+        published_date,
+        categories,
         description,
         isbn,
         google_books_id,
-        added_by_user_id,
         cover_url,
         book_condition,
+        tradable,
       ]
     );
     return newBook.rows[0];
@@ -33,6 +47,13 @@ class Book {
       [book_id]
     );
     return removedBook.rows[0];
+  }
+  static async toggleTradableBookById(book_id, tradable) {
+    const updatedBook = await pool.query(
+      "UPDATE Book SET tradable = $1 WHERE book_id = $2 RETURNING *",
+      [tradable, book_id]
+    );
+    return updatedBook.rows[0];
   }
   static async findBookById(book_id) {
     const book = await pool.query("SELECT * FROM Book WHERE book_id = $1", [
