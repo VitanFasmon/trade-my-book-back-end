@@ -104,7 +104,10 @@ const bookController = {
           .json({ error: "You do not have permission to update this book" });
       }
 
-      const updatedBook = await Book.toggleTradableBookById(book_id, tradable);
+      const updatedBook = await Book.toggleTradableBookById(
+        book_id,
+        tradable == null ? false : tradable
+      );
       res.json({
         data: updatedBook,
         message: "Book tradability updated successfully.",
