@@ -1,3 +1,4 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
@@ -25,8 +26,8 @@ app.get("/", (req, res) => {
 app.post("/api/register", userController.register);
 app.post("/api/login", userController.login);
 
-//Public book routes
-app.get("/api/books/search", bookController.searchBooks);
+// Public or optional-auth book search route
+app.get("/api/books/search", authenticateToken, bookController.searchBooks);
 
 // Protected book routes
 app.post("/api/books", authenticateToken, bookController.addBook);
@@ -46,6 +47,7 @@ app.patch(
   authenticateToken,
   bookController.toggleTradableBookById
 );
+
 // Protected user routes
 app.get("/api/user", authenticateToken, userController.getUserData);
 app.get(
@@ -59,7 +61,7 @@ app.patch(
   userController.updateUserLocationById
 );
 
-//Location routes
+// Location routes
 app.post("/api/location", locationController.addLocation);
 app.get("/api/location/:id", locationController.findLocationById);
 app.get("/api/location", locationController.findLocationByAddress);

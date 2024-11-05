@@ -117,23 +117,23 @@ const bookController = {
       res.status(500).json({ error: "Failed to update book" });
     }
   },
-  searchBooks: async (req, res) => {
-    const userId = req.user ? req.user.user_id : null; // Check if the user is logged in
-    const {
-      title,
-      author,
-      conditionMin,
-      conditionMax,
-      lat,
-      lon,
-      radiusKm,
-      sortField,
-      sortOrder,
-      limit,
-      offset,
-    } = req.query;
-
+  searchBooks: async (req, res, next) => {
     try {
+      const {
+        title,
+        author,
+        conditionMin,
+        conditionMax,
+        lat,
+        lon,
+        radiusKm,
+        sortField,
+        sortOrder,
+        limit = 10,
+        offset = 0,
+      } = req.query;
+
+      const userId = req.user ? req.user.user_id : null;
       const books = await Book.searchBooks({
         title,
         author,
@@ -145,8 +145,8 @@ const bookController = {
         radiusKm: parseFloat(radiusKm) || null,
         sortField,
         sortOrder,
-        limit: parseInt(limit, 10) || 10,
-        offset: parseInt(offset, 10) || 0,
+        limit: parseInt(limit, 10),
+        offset: parseInt(offset, 10),
       });
 
       res.json({ data: books });
