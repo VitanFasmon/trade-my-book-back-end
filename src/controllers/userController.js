@@ -92,3 +92,15 @@ exports.getUserDataByEmail = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user" });
   }
 };
+
+exports.updateUserLocationById = async (req, res) => {
+  const userId = req.user.user_id;
+  const { location_id } = req.body;
+  try {
+    const updatedUser = await User.updateUserLocationById(userId, location_id);
+    res.json({ data: updatedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update user location" });
+  }
+};

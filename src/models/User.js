@@ -31,6 +31,15 @@ class User {
     );
     return result.rows[0];
   }
+  static async updateUserLocationById(userId, locationId) {
+    console.log("userId: " + userId + " locationId: " + locationId);
+    const result = await pool.query(
+      "UPDATE app_user  SET location_id = $1 WHERE user_id = $2 RETURNING name,email,phone_number,location_id",
+      [locationId, userId]
+    );
+    console.log(result.rows[0]);
+    return result.rows[0];
+  }
 }
 
 module.exports = User;

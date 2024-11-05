@@ -53,6 +53,11 @@ app.get(
   authenticateToken,
   userController.getUserData
 );
+app.patch(
+  "/api/user/location",
+  authenticateToken,
+  userController.updateUserLocationById
+);
 
 //Location routes
 app.post("/api/location", locationController.addLocation);
