@@ -25,6 +25,9 @@ app.get("/", (req, res) => {
 app.post("/api/register", userController.register);
 app.post("/api/login", userController.login);
 
+//Public book routes
+app.get("/api/books/search", bookController.searchBooks);
+
 // Protected book routes
 app.post("/api/books", authenticateToken, bookController.addBook);
 app.get(
