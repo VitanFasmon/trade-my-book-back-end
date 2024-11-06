@@ -93,29 +93,32 @@ class Book {
   }) {
     const params = [];
     let query = `
-        SELECT Book.*, App_User.location_id, Location.latitude, Location.longitude
-        FROM Book
-        JOIN App_User ON Book.added_by_user_id = App_User.user_id
-        JOIN Location ON App_User.location_id = Location.location_id
-        WHERE 1=1
-        AND tradable = true
-      `;
+      SELECT Book.*, App_User.location_id, Location.latitude, Location.longitude
+      FROM Book
+      JOIN App_User ON Book.added_by_user_id = App_User.user_id
+      JOIN Location ON App_User.location_id = Location.location_id
+      WHERE tradable = true
+    `;
 
+    // Exclude books added by the current user
     if (userId) {
       params.push(userId);
       query += ` AND Book.added_by_user_id != $${params.length}`;
     }
 
+    // Filter by title if provided
     if (title) {
       params.push(`%${title}%`);
       query += ` AND Book.title ILIKE $${params.length}`;
     }
 
+    // Filter by author if provided
     if (author) {
       params.push(`%${author}%`);
       query += ` AND Book.author ILIKE $${params.length}`;
     }
 
+    // Condition filter
     if (conditionMin) {
       params.push(conditionMin);
       query += ` AND Book.book_condition >= $${params.length}`;
@@ -125,20 +128,22 @@ class Book {
       query += ` AND Book.book_condition <= $${params.length}`;
     }
 
+    // Proximity filter using lat, lon, and radiusKm
     if (lat && lon && radiusKm) {
-      const earthRadiusKm = 6371; // Radius of the Earth in km
-      const radiusDegrees = radiusKm / earthRadiusKm;
-
-      params.push(lat, lon, radiusDegrees);
+      // Push user’s latitude and longitude as params
+      params.push(lat, lon);
       query += `
-          AND ST_DWithin(
-            ST_MakePoint(Location.longitude, Location.latitude)::geography,
-            ST_MakePoint($${params.length - 1}, $${params.length})::geography,
-            $${params.length + 1} * 1000
-          )
-        `;
+        AND ST_DWithin(
+          ST_SetSRID(ST_MakePoint(Location.longitude, Location.latitude), 4326)::geography,
+          ST_SetSRID(ST_MakePoint($${params.length}, $${
+        params.length - 1
+      }), 4326)::geography,
+          ${radiusKm * 1000}  -- Convert radius from km to meters
+        )
+      `;
     }
 
+    // Validate and add sorting
     const validSortFields = [
       "date_added",
       "title",
@@ -151,12 +156,13 @@ class Book {
       sortOrder.toUpperCase() === "DESC" ? "DESC" : "ASC"
     }`;
 
+    // Apply pagination
     params.push(limit, offset);
     query += ` LIMIT $${params.length - 1} OFFSET $${params.length}`;
 
+    // Execute the query
     const result = await pool.query(query, params);
     return result.rows;
   }
 }
-
 module.exports = Book;
