@@ -104,3 +104,25 @@ exports.updateUserLocationById = async (req, res) => {
     res.status(500).json({ error: "Failed to update user location" });
   }
 };
+exports.updateUserName = async (req, res) => {
+  const userId = req.user.user_id;
+  const { name } = req.body;
+  try {
+    const updatedUser = await User.updateUserName(userId, name);
+    res.json({ data: updatedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update user name" });
+  }
+};
+exports.updateUserPhoneNumber = async (req, res) => {
+  const userId = req.user.user_id;
+  const { phone_number } = req.body;
+  try {
+    const updatedUser = await User.updateUserPhoneNumber(userId, phone_number);
+    res.json({ data: updatedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update user phone number" });
+  }
+};

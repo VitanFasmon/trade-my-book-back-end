@@ -2,7 +2,6 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config({ path: `${__dirname}/../.env` });
-console.log("process.env.DB_PASSWORD " + process.env.DB_PASSWORD);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,7 +60,12 @@ app.patch(
   authenticateToken,
   userController.updateUserLocationById
 );
-
+app.patch("/api/user/name", authenticateToken, userController.updateUserName);
+app.patch(
+  "/api/user/phone",
+  authenticateToken,
+  userController.updateUserPhoneNumber
+);
 // Location routes
 app.post("/api/location", locationController.addLocation);
 app.get("/api/location/:id", locationController.findLocationById);
