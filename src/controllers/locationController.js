@@ -25,7 +25,7 @@ exports.findLocationById = async (req, res) => {
     if (!location) {
       return res.status(404).json({ message: "Location not found" });
     }
-    res.status(200).json(location);
+    res.status(200).json({ data: location });
   } catch (error) {
     console.error("Error finding location by ID:", error);
     res.status(500).json({ message: "Failed to find location" });
@@ -40,7 +40,7 @@ exports.findLocationByAddress = async (req, res) => {
     if (!location) {
       return res.status(404).json({ message: "Location not found" });
     }
-    res.status(200).json(location);
+    res.status(200).json({ data: location });
   } catch (error) {
     console.error("Error finding location by address:", error);
     res.status(500).json({ message: "Failed to find location" });

@@ -1,7 +1,8 @@
 // server.js
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+require("dotenv").config({ path: `${__dirname}/../.env` });
+console.log("process.env.DB_PASSWORD " + process.env.DB_PASSWORD);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
