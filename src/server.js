@@ -10,6 +10,7 @@ const pool = require("./db");
 const userController = require("./controllers/userController");
 const bookController = require("./controllers/bookController");
 const locationController = require("./controllers/locationController");
+const tradeController = require("./controllers/tradeController");
 
 const authenticateToken = require("./middleware/auth");
 
@@ -66,10 +67,20 @@ app.patch(
   authenticateToken,
   userController.updateUserPhoneNumber
 );
+
 // Location routes
 app.post("/api/location", locationController.addLocation);
 app.get("/api/location/:id", locationController.findLocationById);
 app.get("/api/location", locationController.findLocationByAddress);
+
+// Trade routes
+app.post("/api/trades", authenticateToken, tradeController.createTrade); // Create trade offer
+app.get("/api/trades/user", authenticateToken, tradeController.getTradesByUser); // Get user's trades
+app.patch(
+  "/api/trades/:trade_id/status",
+  authenticateToken,
+  tradeController.updateTradeStatus
+); // Update trade status
 
 // Start server
 app.listen(PORT, () => {
