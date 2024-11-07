@@ -38,6 +38,7 @@ app.get(
   bookController.getBooksByLocation
 );
 app.get("/api/books/user", authenticateToken, bookController.getBooksByUser);
+app.get("/api/books/:book_id", authenticateToken, bookController.findBookById);
 app.delete(
   "/api/books/:book_id",
   authenticateToken,
@@ -74,8 +75,8 @@ app.get("/api/location/:id", locationController.findLocationById);
 app.get("/api/location", locationController.findLocationByAddress);
 
 // Trade routes
-app.post("/api/trades", authenticateToken, tradeController.createTrade); // Create trade offer
-app.get("/api/trades/user", authenticateToken, tradeController.getTradesByUser); // Get user's trades
+app.post("/api/trades", authenticateToken, tradeController.createTrade);
+app.get("/api/trades/user", authenticateToken, tradeController.getTradesByUser);
 app.patch(
   "/api/trades/:trade_id/status",
   authenticateToken,

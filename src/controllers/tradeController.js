@@ -13,7 +13,9 @@ const tradeController = {
       const requestedBook = await Book.findBookById(requested_book_id);
 
       if (!offeredBook || !requestedBook) {
-        return res.status(404).json({ error: "One or both books not found" });
+        return res.status(404).json({
+          error: "One or both books not found",
+        });
       }
       if (!offeredBook.tradable || !requestedBook.tradable) {
         return res
