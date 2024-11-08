@@ -55,8 +55,9 @@ app.get("/api/user", authenticateToken, userController.getUserData);
 app.get(
   "/api/user/email/:email",
   authenticateToken,
-  userController.getUserData
+  userController.getUserDataByEmail
 );
+app.get("/api/user/id/:id", authenticateToken, userController.getUserDataById);
 app.patch(
   "/api/user/location",
   authenticateToken,

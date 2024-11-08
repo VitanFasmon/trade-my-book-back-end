@@ -31,6 +31,13 @@ class User {
     );
     return result.rows[0];
   }
+  static async findByUserId(id) {
+    const result = await pool.query(
+      "SELECT name, email, phone_number,location_id FROM App_User WHERE user_id = $1",
+      [id]
+    );
+    return result.rows[0];
+  }
 
   static async updateUserName(userId, name) {
     const result = await pool.query(

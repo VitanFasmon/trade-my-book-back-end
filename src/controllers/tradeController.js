@@ -5,13 +5,12 @@ const tradeController = {
   // Create a trade offer
   createTrade: async (req, res) => {
     const { offered_book_id, requested_book_id } = req.body;
-    const user_to = req.user.user_id;
+    const user_from = req.user.user_id;
 
     try {
-      // Ensure the books exist and are tradable
       const offeredBook = await Book.findBookById(offered_book_id);
       const requestedBook = await Book.findBookById(requested_book_id);
-      const user_from = requestedBook.added_by_user_id;
+      const user_to = requestedBook.added_by_user_id;
       if (!offeredBook || !requestedBook) {
         return res.status(404).json({
           error: "One or both books not found",
@@ -53,7 +52,7 @@ const tradeController = {
   updateTradeStatus: async (req, res) => {
     const { trade_id } = req.params;
     const { status } = req.body;
-    const validStatuses = ["accepted", "rejected", "cancelled"];
+    const validStatuses = ["accepted", "rejected", "canceled"];
 
     // Check for valid status
     if (!validStatuses.includes(status)) {

@@ -93,6 +93,20 @@ exports.getUserDataByEmail = async (req, res) => {
   }
 };
 
+exports.getUserDataById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findByUserId(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({ data: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch user" });
+  }
+};
+
 exports.updateUserLocationById = async (req, res) => {
   const userId = req.user.user_id;
   const { location_id } = req.body;
