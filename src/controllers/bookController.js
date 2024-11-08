@@ -102,6 +102,21 @@ const bookController = {
       res.status(500).json({ error: "Failed to get book" });
     }
   },
+  findBookOwnerById: async (req, res) => {
+    const { book_id } = req.params;
+    try {
+      const book = await Book.findBookOwnerById(book_id);
+
+      if (!book) {
+        return res.status(404).json({ error: "Book owner not found" });
+      }
+
+      res.json({ data: book });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to get book owner" });
+    }
+  },
   toggleTradableBookById: async (req, res) => {
     const userId = req.user.user_id;
     const { book_id, tradable } = req.params;

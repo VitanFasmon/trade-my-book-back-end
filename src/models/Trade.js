@@ -1,4 +1,5 @@
 const pool = require("../db");
+const Book = require("../models/Book");
 
 class Trade {
   // Create a new trade offer
