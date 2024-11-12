@@ -1,7 +1,7 @@
 const Trade = require("../models/Trade");
 const Book = require("../models/Book");
-const User = require("../models/User"); // Assuming a User model to fetch user details
-const sendEmail = require("../utils/emailService");
+const User = require("../models/User");
+const { sendEmail } = require("../utils/emailService");
 
 const tradeController = {
   // Create a trade offer
@@ -32,8 +32,8 @@ const tradeController = {
       );
 
       // Fetch user emails
-      const initiator = await User.findById(user_from);
-      const recipient = await User.findById(user_to);
+      const initiator = await User.findByUserId(user_from);
+      const recipient = await User.findByUserId(user_to);
 
       // Send email notification to the recipient
       const emailContent = `
@@ -41,6 +41,7 @@ const tradeController = {
         <p>${initiator.name} has offered a trade with you.</p>
         <p>Offered Book: ${offeredBook.title}</p>
         <p>Requested Book: ${requestedBook.title}</p>
+         <a href="${process.env.FRONTEND_URL}/trades/${trade.trade_id}">Link to trade</a>
       `;
       await sendEmail(recipient.email, "New Trade Offer", emailContent);
 
@@ -51,7 +52,6 @@ const tradeController = {
     }
   },
 
-  // Fetch all trades for the authenticated user
   getTradesByUser: async (req, res) => {
     const userId = req.user.user_id;
     try {
@@ -63,6 +63,27 @@ const tradeController = {
     }
   },
 
+  getTradeById: async (req, res) => {
+    const userId = req.user.user_id;
+    const { trade_id } = req.params;
+
+    try {
+      const trade = await Trade.getTradeById(trade_id);
+      if (!trade) {
+        return res.status(404).json({ error: "Trade not found" });
+      }
+      if (userId !== trade.user_to && userId !== trade.user_from) {
+        return res
+          .status(403)
+          .json({ error: "Unauthorized to view this trade" });
+      }
+
+      res.json({ data: trade });
+    } catch (error) {
+      console.error("Error fetching trade:", error);
+      res.status(500).json({ error: "Failed to fetch trade" });
+    }
+  },
   // Update trade status (accept, reject, or cancel)
   updateTradeStatus: async (req, res) => {
     const { trade_id } = req.params;
@@ -101,8 +122,8 @@ const tradeController = {
       }
 
       // Fetch user emails for notifications
-      const initiator = await User.findById(trade.user_from);
-      const recipient = await User.findById(trade.user_to);
+      const initiator = await User.findByUserId(trade.user_from);
+      const recipient = await User.findByUserId(trade.user_to);
 
       // Determine email content based on status
       let emailContent;
@@ -115,16 +136,19 @@ const tradeController = {
             <li>${initiator.name}'s Book: ${trade.offered_book_id}</li>
             <li>${recipient.name}'s Book: ${trade.requested_book_id}</li>
           </ul>
+         <a href="${process.env.FRONTEND_URL}/trades/${trade.trade_id}">Link to trade</a>
         `;
       } else if (status === "rejected") {
         emailContent = `
           <p>Hi ${initiator.name} and ${recipient.name},</p>
           <p>The trade offer has been rejected.</p>
+         <a href="${process.env.FRONTEND_URL}/trades/${trade.trade_id}">Link to trade</a>
         `;
       } else if (status === "canceled") {
         emailContent = `
           <p>Hi ${initiator.name} and ${recipient.name},</p>
           <p>The trade offer has been canceled.</p>
+         <a href="${process.env.FRONTEND_URL}/trades/${trade.trade_id}">Link to trade</a>
         `;
       }
 

@@ -79,6 +79,11 @@ app.get("/api/location", locationController.findLocationByAddress);
 
 // Trade routes
 app.post("/api/trades", authenticateToken, tradeController.createTrade);
+app.get(
+  "/api/trade/:trade_id",
+  authenticateToken,
+  tradeController.getTradeById
+);
 app.get("/api/trades/user", authenticateToken, tradeController.getTradesByUser);
 app.patch(
   "/api/trades/:trade_id/status",
