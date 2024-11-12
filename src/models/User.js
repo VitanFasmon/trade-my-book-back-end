@@ -41,14 +41,14 @@ class User {
 
   static async updateUserName(userId, name) {
     const result = await pool.query(
-      "UPDATE app_user  SET name = $1 WHERE user_id = $2 RETURNING name,email,phone_number,location_id",
+      "UPDATE app_user  SET name = $1 WHERE user_id = $2 RETURNING name,email,phone_number,location_id,is_active",
       [name, userId]
     );
     return result.rows[0];
   }
   static async updateUserPhoneNumber(userId, phone_number) {
     const result = await pool.query(
-      "UPDATE app_user  SET phone_number = $1 WHERE user_id = $2 RETURNING name,email,phone_number,location_id",
+      "UPDATE app_user  SET phone_number = $1 WHERE user_id = $2 RETURNING name,email,phone_number,location_id,is_active",
       [phone_number, userId]
     );
     return result.rows[0];
@@ -56,7 +56,7 @@ class User {
 
   static async updateUserLocationById(userId, locationId) {
     const result = await pool.query(
-      "UPDATE app_user  SET location_id = $1 WHERE user_id = $2 RETURNING name,email,phone_number,location_id",
+      "UPDATE app_user  SET location_id = $1 WHERE user_id = $2 RETURNING name,email,phone_number,location_id,is_active",
       [locationId, userId]
     );
     return result.rows[0];
