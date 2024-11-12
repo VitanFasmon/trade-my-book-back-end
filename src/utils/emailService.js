@@ -13,7 +13,7 @@ const oAuth2Client = new google.auth.OAuth2(
 );
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
-async function sendEmail(to, subject, htmlContent) {
+const sendEmail = async (to, subject, htmlContent) => {
   try {
     const accessToken = await oAuth2Client.getAccessToken();
 
@@ -42,6 +42,20 @@ async function sendEmail(to, subject, htmlContent) {
   } catch (error) {
     console.error("Error sending email:", error);
   }
-}
+};
+const sendConfirmationEmail = async (email, token, name) => {
+  const confirmationLink = `${process.env.FRONTEND_URL}/confirm/${token}`;
+  const emailContent = `
+    <h2>Hi ${name},</h2>
+    <p>Thank you for registering at TradeMyBook!</p>
+    <p>Please confirm your email address by clicking the link below:</p>
+    <a href="${confirmationLink}">Confirm Email</a>
+    <p>Alternatively, you can copy and paste the link below into your browser:</p> <p>${confirmationLink}</p>
+  `;
 
-module.exports = sendEmail;
+  await sendEmail(email, "Confirm Your Email", emailContent);
+};
+module.exports = {
+  sendEmail,
+  sendConfirmationEmail,
+};

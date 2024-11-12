@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const pool = require("../db");
-const sendEmail = require("../utils/emailService");
+const { sendConfirmationEmail } = require("../utils/emailService");
 const crypto = require("crypto");
 const User = require("../models/User");
 
@@ -20,21 +20,12 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const token = crypto.randomBytes(32).toString("hex");
 
-    const newUser = await pool.query(
+    await pool.query(
       `INSERT INTO app_user (name, email, phone_number, password, location_id, is_active, confirmation_token)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [name, email, phone_number, hashedPassword, location_id, false, token]
     );
-
-    const confirmationLink = `${process.env.FRONTEND_URL}/api/confirm/${token}`;
-    const emailContent = `
-      <p>Hi ${name},</p>
-      <p>Please confirm your email address by clicking the link below:</p>
-      <a href="${confirmationLink}">Confirm Email</a>
-    `;
-
-    await sendEmail(email, "Confirm Your Email", emailContent);
-
+    await sendConfirmationEmail(email, token, name);
     res.status(201).json({
       message: "Registration successful! Please check your email to confirm.",
     });
@@ -43,7 +34,6 @@ exports.register = async (req, res) => {
     res.status(500).json({ message: `Something went wrong: ${error.message}` });
   }
 };
-
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -78,6 +68,31 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.resendConfirmationEmail = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await pool.query(
+      `SELECT confirmation_token,name FROM app_user WHERE email = $1`,
+      [email]
+    );
+    if (user.rows.length === 0) {
+      return res.status(401).json({ message: "Invalid email." });
+    }
+    const response = await sendConfirmationEmail(
+      email,
+      user.rows[0].confirmation_token,
+      user.rows[0].name
+    );
+    res.status(201).json({
+      data: response,
+      message:
+        "Email sent to your registered email address. Please check your email to confirm.",
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: `Something went wrong: ${error.message}` });
+  }
+};
 exports.getUserData = async (req, res) => {
   const userId = req.user.user_id;
   try {

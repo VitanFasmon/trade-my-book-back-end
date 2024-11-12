@@ -27,6 +27,7 @@ app.get("/", (req, res) => {
 app.post("/api/register", userController.register);
 app.post("/api/login", userController.login);
 app.get("/api/confirm/:token", userController.confirmEmail);
+app.post("/api/resend-email", userController.resendConfirmationEmail);
 
 // Public or optional-auth book search route
 app.get("/api/books/search", authenticateToken, bookController.searchBooks);
