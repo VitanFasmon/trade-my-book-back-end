@@ -13,6 +13,7 @@ const locationController = require("./controllers/locationController");
 const tradeController = require("./controllers/tradeController");
 
 const authenticateToken = require("./middleware/auth");
+const commentController = require("./controllers/commentController");
 
 // Middleware
 app.use(cors());
@@ -90,6 +91,11 @@ app.patch(
   authenticateToken,
   tradeController.updateTradeStatus
 ); // Update trade status
+
+//Comment routes
+app.get("/api/comments/:tradeId", commentController.getCommentsByTradeId);
+app.get("/api/comment/:commentId", commentController.getCommentsByTradeId);
+app.post("/api/comments", authenticateToken, commentController.addComment);
 
 // Start server
 app.listen(PORT, () => {
