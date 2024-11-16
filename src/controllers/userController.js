@@ -133,7 +133,19 @@ exports.getUserDataById = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user" });
   }
 };
-
+exports.getAcceptedTradesIdsByUserId = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const tradeIds = await User.getAcceptedTradesIdsByUserId(id);
+    if (!tradeIds) {
+      return res.status(404).json({ message: "Trades not found" });
+    }
+    res.json({ data: tradeIds });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch Trades" });
+  }
+};
 exports.updateUserLocationById = async (req, res) => {
   const userId = req.user.user_id;
   const { location_id } = req.body;

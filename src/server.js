@@ -61,6 +61,11 @@ app.get(
   userController.getUserDataByEmail
 );
 app.get("/api/user/id/:id", authenticateToken, userController.getUserDataById);
+app.get(
+  "/api/user/trades/accepted/:id",
+  authenticateToken,
+  userController.getAcceptedTradesIdsByUserId
+);
 app.patch(
   "/api/user/location",
   authenticateToken,
@@ -90,11 +95,23 @@ app.patch(
   "/api/trades/:trade_id/status",
   authenticateToken,
   tradeController.updateTradeStatus
-); // Update trade status
+);
+
+//Rating routes
+router.post("/api/ratings", ratingController.createRating);
+
+router.get("/api/ratings/user/:userId", ratingController.getRatingsByUserId);
+
+router.get("/api/ratings/trade/:tradeId", ratingController.getRatingsByTradeId);
+
+router.get(
+  "/api/ratings/user/:userId/average",
+  ratingController.getAverageRatingByUserId
+);
 
 //Comment routes
-app.get("/api/comments/:tradeId", commentController.getCommentsByTradeId);
-app.get("/api/comment/:commentId", commentController.getCommentsByTradeId);
+app.get("/api/comments/:trade_id", commentController.getCommentsByTradeId);
+app.get("/api/comment/:comment_id", commentController.getCommentsByTradeId);
 app.post("/api/comments", authenticateToken, commentController.addComment);
 
 // Start server

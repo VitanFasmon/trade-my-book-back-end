@@ -2,7 +2,6 @@ const pool = require("../db");
 
 class Comment {
   static async addComment(tradeId, userId, content) {
-    console.log(tradeId);
     const newComment = await pool.query(
       `INSERT INTO Comment (trade_id, user_id, content)
        VALUES ($1, $2, $3) RETURNING *`,
@@ -14,7 +13,7 @@ class Comment {
   static async getCommentsByTradeId(tradeId) {
     const comments = await pool.query(
       `SELECT * FROM Comment WHERE trade_id = $1 ORDER BY date_posted ASC`,
-      [tradeId, userId]
+      [tradeId]
     );
     return comments.rows;
   }
