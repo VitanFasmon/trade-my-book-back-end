@@ -11,6 +11,7 @@ const userController = require("./controllers/userController");
 const bookController = require("./controllers/bookController");
 const locationController = require("./controllers/locationController");
 const tradeController = require("./controllers/tradeController");
+const ratingController = require("./controllers/ratingController");
 
 const authenticateToken = require("./middleware/auth");
 const commentController = require("./controllers/commentController");
@@ -98,14 +99,14 @@ app.patch(
 );
 
 //Rating routes
-router.post("/api/ratings", ratingController.createRating);
+app.post("/api/ratings", ratingController.createRating);
+app.patch("/api/ratings", ratingController.updateRating);
+app.get("/api/ratings/user/:user_id", ratingController.getRatingsByUserId);
 
-router.get("/api/ratings/user/:userId", ratingController.getRatingsByUserId);
+app.get("/api/ratings/trade/:trade_id", ratingController.getRatingsByTradeId);
 
-router.get("/api/ratings/trade/:tradeId", ratingController.getRatingsByTradeId);
-
-router.get(
-  "/api/ratings/user/:userId/average",
+app.get(
+  "/api/ratings/user/:user_id/average",
   ratingController.getAverageRatingByUserId
 );
 

@@ -1,15 +1,10 @@
 const Rating = require("../models/Rating");
 
 exports.createRating = async (req, res) => {
-  const { userId, tradeId, rating, comment } = req.body;
+  const { user_id, trade_id, rating } = req.body;
 
   try {
-    const newRating = await Rating.createRating(
-      userId,
-      tradeId,
-      rating,
-      comment
-    );
+    const newRating = await Rating.createRating(user_id, trade_id, rating);
     res.status(201).json({ data: newRating });
   } catch (error) {
     console.error("Error creating rating:", error.message);
@@ -18,12 +13,24 @@ exports.createRating = async (req, res) => {
       .json({ message: `Failed to create rating: ${error.message}` });
   }
 };
-
-exports.getRatingsByUserId = async (req, res) => {
-  const { userId } = req.params;
+exports.updateRating = async (req, res) => {
+  const { user_id, trade_id, rating } = req.body;
 
   try {
-    const ratings = await Rating.getRatingsByUserId(userId);
+    const newRating = await Rating.updateRating(user_id, trade_id, rating);
+    res.status(201).json({ data: newRating });
+  } catch (error) {
+    console.error("Error updating rating:", error.message);
+    res
+      .status(500)
+      .json({ message: `Failed to update rating: ${error.message}` });
+  }
+};
+exports.getRatingsByUserId = async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    const ratings = await Rating.getRatingsByUserId(user_id);
     res.json({ data: ratings });
   } catch (error) {
     console.error("Error fetching user ratings:", error.message);
@@ -34,10 +41,9 @@ exports.getRatingsByUserId = async (req, res) => {
 };
 
 exports.getRatingsByTradeId = async (req, res) => {
-  const { tradeId } = req.params;
-
+  const { trade_id } = req.params;
   try {
-    const ratings = await Rating.getRatingsByTradeId(tradeId);
+    const ratings = await Rating.getRatingsByTradeId(trade_id);
     res.json({ data: ratings });
   } catch (error) {
     console.error("Error fetching trade ratings:", error.message);
@@ -48,15 +54,11 @@ exports.getRatingsByTradeId = async (req, res) => {
 };
 
 exports.getAverageRatingByUserId = async (req, res) => {
-  const { userId } = req.params;
+  const { user_id } = req.params;
 
   try {
-    const averageRating = await Rating.getAverageRatingByUserId(userId);
-    if (averageRating === null) {
-      return res
-        .status(404)
-        .json({ message: "No ratings found for this user." });
-    }
+    const averageRating = await Rating.getAverageRatingByUserId(user_id);
+
     res.json({ data: { averageRating } });
   } catch (error) {
     console.error("Error fetching average rating:", error.message);

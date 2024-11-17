@@ -1,12 +1,20 @@
 const pool = require("../db");
 
 class Rating {
-  static async createRating(userId, tradeId, rating, comment) {
+  static async createRating(userId, tradeId, rating) {
     const result = await pool.query(
-      `INSERT INTO Rating (user_id, trade_id, rating, comment)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO Rating (user_id, trade_id, rating)
+       VALUES ($1, $2, $3)
        RETURNING *`,
-      [userId, tradeId, rating, comment]
+      [userId, tradeId, rating]
+    );
+    return result.rows[0];
+  }
+  static async updateRating(userId, tradeId, rating) {
+    const result = await pool.query(
+      `UPDATE Rating SET user_id=$1, trade_id=$2, rating=$3 WHERE trade_id = $2 AND user_id = $1
+       RETURNING *`,
+      [userId, tradeId, rating]
     );
     return result.rows[0];
   }
