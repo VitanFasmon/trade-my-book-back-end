@@ -1,10 +1,14 @@
 const Trade = require("../models/Trade");
 const Book = require("../models/Book");
 const User = require("../models/User");
-const { sendEmail } = require("../utils/emailService");
+const Location = require("../models/Location");
+const {
+  sendEmail,
+  createTradeEmailContent,
+  updateTradeEmailContent,
+} = require("../utils/emailService");
 
 const tradeController = {
-  // Create a trade offer
   createTrade: async (req, res) => {
     const { offered_book_id, requested_book_id } = req.body;
     const user_from = req.user.user_id;
@@ -23,7 +27,6 @@ const tradeController = {
           .json({ error: "One or both books are not tradable" });
       }
 
-      // Create trade offer
       const trade = await Trade.createTrade(
         offered_book_id,
         requested_book_id,
@@ -31,19 +34,30 @@ const tradeController = {
         user_to
       );
 
-      // Fetch user emails
       const initiator = await User.findByUserId(user_from);
       const recipient = await User.findByUserId(user_to);
+      const initiatorAddress = initiator.location_id
+        ? await Location.findById(initiator.location_id)
+        : null;
 
-      // Send email notification to the recipient
-      const emailContent = `
-        <p>Hi ${recipient.name},</p>
-        <p>${initiator.name} has offered a trade with you.</p>
-        <p>Offered Book: ${offeredBook.title}</p>
-        <p>Requested Book: ${requestedBook.title}</p>
-         <a href="${process.env.FRONTEND_URL}/trades/${trade.trade_id}">Link to trade</a>
-      `;
-      await sendEmail(recipient.email, "New Trade Offer", emailContent);
+      const recipientAddress = recipient.location_id
+        ? await Location.findById(recipient.location_id)
+        : null;
+
+      await sendEmail(
+        recipient.email,
+        "New Trade Offer",
+        createTradeEmailContent({
+          recipientName: recipient.name,
+          initiatorName: initiator.name,
+          initiatorEmail: initiator.email,
+          offeredBookTitle: offeredBook.title,
+          requestedBookTitle: requestedBook.title,
+          initiatorAddress: JSON.parse(recipientAddress.address),
+          recipientAddress: JSON.parse(initiatorAddress.address),
+          tradeLink: `${process.env.FRONTEND_URL}/trades/${trade.trade_id}`,
+        })
+      );
 
       res.status(201).json({ data: trade });
     } catch (error) {
@@ -84,24 +98,27 @@ const tradeController = {
       res.status(500).json({ error: "Failed to fetch trade" });
     }
   },
-  // Update trade status (accept, reject, or cancel)
   updateTradeStatus: async (req, res) => {
     const { trade_id } = req.params;
     const { status } = req.body;
     const validStatuses = ["accepted", "rejected", "canceled"];
 
-    // Check for valid status
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ error: "Invalid status" });
     }
 
     try {
-      // Find the trade
       const trade = await Trade.getTradeById(trade_id);
       if (!trade) {
         return res.status(404).json({ error: "Trade not found" });
       }
 
+      const offeredBook = await Book.findBookById(trade.offered_book_id);
+      const requestedBook = await Book.findBookById(trade.requested_book_id);
+
+      if (!offeredBook || !requestedBook) {
+        return res.status(404).json({ error: "One or both books not found" });
+      }
       // Check authorization (only the recipient or initiator can modify the trade)
       if (
         req.user.user_id !== trade.user_from &&
@@ -112,50 +129,50 @@ const tradeController = {
           .json({ error: "Unauthorized to modify this trade" });
       }
 
-      // Update the trade status
       const updatedTrade = await Trade.updateTradeStatus(trade_id, status);
 
-      // If trade is accepted, mark both books as non-tradable
       if (status === "accepted") {
         await Book.toggleTradableBookById(trade.offered_book_id, false);
         await Book.toggleTradableBookById(trade.requested_book_id, false);
       }
 
-      // Fetch user emails for notifications
       const initiator = await User.findByUserId(trade.user_from);
       const recipient = await User.findByUserId(trade.user_to);
+      const initiatorAddress = initiator.location_id
+        ? await Location.findById(initiator.location_id)
+        : null;
+      const recipientAddress = recipient.location_id
+        ? await Location.findById(recipient.location_id)
+        : null;
 
-      // Determine email content based on status
-      let emailContent;
-      if (status === "accepted") {
-        emailContent = `
-          <p>Hi ${initiator.name} and ${recipient.name},</p>
-          <p>Your trade has been accepted!</p>
-          <p>Books involved:</p>
-          <ul>
-            <li>${initiator.name}'s Book: ${trade.offered_book_id}</li>
-            <li>${recipient.name}'s Book: ${trade.requested_book_id}</li>
-          </ul>
-         <a href="${process.env.FRONTEND_URL}/trades/${trade.trade_id}">Link to trade</a>
-        `;
-      } else if (status === "rejected") {
-        emailContent = `
-          <p>Hi ${initiator.name} and ${recipient.name},</p>
-          <p>The trade offer has been rejected.</p>
-         <a href="${process.env.FRONTEND_URL}/trades/${trade.trade_id}">Link to trade</a>
-        `;
-      } else if (status === "canceled") {
-        emailContent = `
-          <p>Hi ${initiator.name} and ${recipient.name},</p>
-          <p>The trade offer has been canceled.</p>
-         <a href="${process.env.FRONTEND_URL}/trades/${trade.trade_id}">Link to trade</a>
-        `;
-      }
-
-      // Send notifications to both parties
-      await sendEmail(initiator.email, `Trade ${status}`, emailContent);
-      await sendEmail(recipient.email, `Trade ${status}`, emailContent);
-
+      await sendEmail(
+        initiator.email,
+        `Trade ${status}`,
+        updateTradeEmailContent({
+          recipientName: initiator.name,
+          initiatorName: recipient.name,
+          offeredBookTitle: requestedBook.title,
+          requestedBookTitle: offeredBook.title,
+          initiatorAddress: JSON.parse(recipientAddress.address),
+          recipientAddress: JSON.parse(initiatorAddress.address),
+          tradeLink: `${process.env.FRONTEND_URL}/trades/${trade.trade_id}`,
+          status: status,
+        })
+      );
+      await sendEmail(
+        recipient.email,
+        `Trade ${status}`,
+        updateTradeEmailContent({
+          recipientName: recipient.name,
+          initiatorName: initiator.name,
+          offeredBookTitle: offeredBook.title,
+          requestedBookTitle: requestedBook.title,
+          initiatorAddress: JSON.parse(initiatorAddress.address),
+          recipientAddress: JSON.parse(recipientAddress.address),
+          tradeLink: `${process.env.FRONTEND_URL}/trades/${trade.trade_id}`,
+          status: status,
+        })
+      );
       res.json({
         data: updatedTrade,
         message: `Trade ${status} successfully.`,
