@@ -53,7 +53,11 @@ app.patch(
   authenticateToken,
   bookController.toggleTradableBookById
 );
-
+app.patch(
+  "/api/books/:book_id",
+  authenticateToken,
+  bookController.updateBookById
+);
 // Protected user routes
 app.get("/api/user", authenticateToken, userController.getUserData);
 app.get(

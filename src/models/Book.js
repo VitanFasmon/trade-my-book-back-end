@@ -48,6 +48,43 @@ class Book {
     );
     return removedBook.rows[0];
   }
+  static async updateBookById(
+    book_id,
+    date_added,
+    title,
+    subtitle,
+    author,
+    language,
+    published_date,
+    categories,
+    description,
+    isbn,
+    google_books_id,
+    cover_url,
+    book_condition,
+    tradable
+  ) {
+    const updatedBook = await pool.query(
+      "UPDATE Book SET title=$2, subtitle=$3, author=$4, language=$5, published_date=$6, categories=$7, description=$8, isbn=$9, google_books_id=$10, cover_url=$11, book_condition=$12, tradable=$13 ,date_added=$14 WHERE book_id = $1 RETURNING *",
+      [
+        book_id,
+        title,
+        subtitle,
+        author,
+        language,
+        published_date,
+        categories,
+        description,
+        isbn,
+        google_books_id,
+        cover_url,
+        book_condition,
+        tradable,
+        date_added,
+      ]
+    );
+    return updatedBook.rows[0];
+  }
   static async toggleTradableBookById(book_id, tradable) {
     const updatedBook = await pool.query(
       "UPDATE Book SET tradable = $1 WHERE book_id = $2 RETURNING *",

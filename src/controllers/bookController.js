@@ -117,6 +117,63 @@ const bookController = {
       res.status(500).json({ error: "Failed to get book owner" });
     }
   },
+  updateBookById: async (req, res) => {
+    const userId = req.user.user_id;
+    const {
+      book_id,
+      added_by_user_id,
+      date_added,
+      title,
+      subtitle,
+      author,
+      language,
+      published_date,
+      categories,
+      description,
+      isbn,
+      google_books_id,
+      cover_url,
+      book_condition,
+      tradable,
+    } = req.body;
+    try {
+      const book = await Book.findBookById(book_id);
+
+      if (!book) {
+        return res.status(404).json({ error: "Book not found" });
+      }
+
+      if (book.added_by_user_id !== userId) {
+        return res
+          .status(403)
+          .json({ error: "You do not have permission to update this book" });
+      }
+
+      const updatedBook = await Book.updateBookById(
+        book_id,
+        date_added,
+        title,
+        subtitle,
+        author,
+        language,
+        published_date,
+        categories,
+        description,
+        isbn,
+        google_books_id,
+        cover_url,
+        book_condition,
+        tradable
+      );
+      res.json({
+        data: updatedBook,
+        message: "Book updated successfully.",
+      });
+    } catch (error) {
+      console.error("Error updating book:", error);
+      res.status(500).json({ error: "Failed to update book" });
+    }
+  },
   toggleTradableBookById: async (req, res) => {
     const userId = req.user.user_id;
     const { book_id, tradable } = req.params;
