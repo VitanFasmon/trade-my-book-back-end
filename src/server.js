@@ -2,6 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config({ path: `${__dirname}/../.env` });
+const imageRoutes = require("./routes/imageRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,7 @@ const commentController = require("./controllers/commentController");
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static("uploads")); // Serve uploaded files
 
 // Routes
 app.get("/", (req, res) => {
@@ -118,6 +120,9 @@ app.get(
 app.get("/api/comments/:trade_id", commentController.getCommentsByTradeId);
 app.get("/api/comment/:comment_id", commentController.getCommentsByTradeId);
 app.post("/api/comments", authenticateToken, commentController.addComment);
+
+//Image routes
+app.use("/api/image", imageRoutes);
 
 // Start server
 app.listen(PORT, () => {
