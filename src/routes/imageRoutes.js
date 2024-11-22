@@ -4,7 +4,6 @@ const { upload } = require("../utils/imageService");
 const router = express.Router();
 
 router.post("/upload", upload.single("image"), (req, res) => {
-  console.log(req.file);
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded" });
   }
