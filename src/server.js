@@ -97,6 +97,7 @@ app.get(
   authenticateToken,
   tradeController.getTradeById
 );
+app.get("/api/trade/public/:trade_id", tradeController.getPublicTradeById);
 app.get("/api/trades/user", authenticateToken, tradeController.getTradesByUser);
 app.patch(
   "/api/trades/:trade_id/status",

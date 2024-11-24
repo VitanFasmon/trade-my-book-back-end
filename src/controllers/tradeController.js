@@ -98,6 +98,20 @@ const tradeController = {
       res.status(500).json({ error: "Failed to fetch trade" });
     }
   },
+  getPublicTradeById: async (req, res) => {
+    const { trade_id } = req.params;
+
+    try {
+      const trade = await Trade.getPublicTradeById(trade_id);
+      if (!trade) {
+        return res.status(404).json({ error: "Trade not found" });
+      }
+      res.json({ data: trade });
+    } catch (error) {
+      console.error("Error fetching trade:", error);
+      res.status(500).json({ error: "Failed to fetch trade" });
+    }
+  },
   updateTradeStatus: async (req, res) => {
     const { trade_id } = req.params;
     const { status } = req.body;

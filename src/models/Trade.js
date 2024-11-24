@@ -30,7 +30,13 @@ class Trade {
     ]);
     return trade.rows[0];
   }
-
+  static async getPublicTradeById(tradeId) {
+    const trade = await pool.query(
+      `SELECT trade_id, user_from,user_to,trade_date, FROM Trade WHERE trade_id = $1`,
+      [tradeId]
+    );
+    return trade.rows[0];
+  }
   static async updateTradeStatus(tradeId, status) {
     const updatedTrade = await pool.query(
       `UPDATE Trade SET status = $1 WHERE trade_id = $2 RETURNING *`,
