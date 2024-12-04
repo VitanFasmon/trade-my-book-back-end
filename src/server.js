@@ -44,6 +44,11 @@ app.get(
   bookController.getBooksByLocation
 );
 app.get("/api/books/user", authenticateToken, bookController.getBooksByUser);
+app.get(
+  "/api/books/user/:user_id",
+  authenticateToken,
+  bookController.getPublicBooksByUser
+);
 app.get("/api/books/:book_id", authenticateToken, bookController.findBookById);
 app.delete(
   "/api/books/:book_id",
@@ -126,6 +131,6 @@ app.post("/api/comments", authenticateToken, commentController.addComment);
 app.use("/api/image", imageRoutes);
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

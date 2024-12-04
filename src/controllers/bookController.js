@@ -63,6 +63,16 @@ const bookController = {
       res.status(500).json({ error: "Failed to fetch books" });
     }
   },
+  getPublicBooksByUser: async (req, res) => {
+    const { user_id } = req.params;
+    try {
+      const books = await Book.getPublicBooksByUser(user_id);
+      res.json({ data: books });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to fetch books" });
+    }
+  },
   removeBookById: async (req, res) => {
     const userId = req.user.user_id;
     const { book_id } = req.params;

@@ -120,6 +120,13 @@ class Book {
     );
     return books.rows;
   }
+  static async getPublicBooksByUser(added_by_user_id) {
+    const books = await pool.query(
+      "SELECT * FROM Book WHERE added_by_user_id = $1 AND tradable = true",
+      [added_by_user_id]
+    );
+    return books.rows;
+  }
   static async searchBooks({
     title,
     author,

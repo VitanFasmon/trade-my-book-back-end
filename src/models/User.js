@@ -13,7 +13,7 @@ class User {
 
   static async findByUserId(userId) {
     const result = await pool.query(
-      "SELECT name, email, phone_number,location_id ,registration_date FROM App_User WHERE user_id = $1",
+      "SELECT user_id, name, email, phone_number,location_id ,registration_date FROM App_User WHERE user_id = $1",
       [userId]
     );
     return result.rows[0];

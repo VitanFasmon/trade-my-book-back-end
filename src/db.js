@@ -1,12 +1,12 @@
-const { Pool } = require("pg");
+const { createClient } = require("@supabase/supabase-js");
+
+// Load environment variables
 require("dotenv").config();
 
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-});
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
 
-module.exports = pool;
+// Create Supabase client
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+module.exports = supabase;
