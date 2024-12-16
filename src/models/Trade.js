@@ -32,7 +32,7 @@ class Trade {
   }
   static async getPublicTradeById(tradeId) {
     const trade = await pool.query(
-      `SELECT trade_id, user_from,user_to,trade_date, FROM Trade WHERE trade_id = $1`,
+      `SELECT trade_id, user_from,user_to,trade_date FROM Trade WHERE trade_id = $1`,
       [tradeId]
     );
     return trade.rows[0];
